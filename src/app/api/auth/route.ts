@@ -3,12 +3,26 @@ import { OpenAI } from "openai";
 import { Octokit } from "@octokit/rest";
 import { GraphQLResponse, UserStats } from "@/lib/interfaces/interfaces";
 
+export const runtime = 'edge';
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+if (!OPENAI_API_KEY) {
+  throw new Error('Missing OPENAI_API_KEY environment variable');
+}
+
+if (!GITHUB_TOKEN) {
+  throw new Error('Missing GITHUB_TOKEN environment variable');
+}
+
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN
+  auth: GITHUB_TOKEN
 });
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
 });
 
 async function generateAIAnalysis(userData: { stats: UserStats }) {
