@@ -86,3 +86,9 @@ export interface GraphQLResponse {
       };
     };
   }
+
+export interface ImgBBResponse {
+  success: boolean;
+  data: { url: string };
+  error?: { message: string };
+}

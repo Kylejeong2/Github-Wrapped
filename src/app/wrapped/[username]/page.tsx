@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { FaStar, FaCode, FaFire, FaTrophy, FaExternalLinkAlt } from "react-icons/fa";
+import { FaStar, FaCode, FaFire, FaTrophy, FaExternalLinkAlt, FaTwitter } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import GitHubCalendar from 'react-github-calendar';
 import Image from "next/image";
+import html2canvas from 'html2canvas';
 
 export const runtime = 'edge';
 
@@ -15,7 +16,34 @@ export default function WrappedPage({ params }: { params: { username: string } }
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSharing, setIsSharing] = useState(false);
   const router = useRouter();
+
+  const shareToTwitter = async () => {
+    try {
+      setIsSharing(true);
+      
+      const topLanguages = data.stats.topLanguages
+        .slice(0, 3)
+        .map(([lang]: [string, number]) => lang)
+        .join(', ');
+
+      const tweetText = encodeURIComponent(
+        `My GitHub Wrapped 2024:\n\n` +
+        `🔥 ${data.stats.totalCommits.toLocaleString()} commits\n` +
+        `📚 ${data.stats.totalRepos} repositories\n` +
+        `💻 Top languages: ${topLanguages}\n` +
+        `✨ ${data.stats.randomMonthAnalysis.words.join(', ')}\n\n` +
+        `Generate yours at github-wrapped.pages.dev`
+      );
+
+      window.open(`https://twitter.com/intent/tweet?text=${tweetText}`, '_blank', 'width=550,height=420');
+    } catch (error) {
+      console.error('Error sharing:', error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/auth", {
@@ -60,7 +88,6 @@ export default function WrappedPage({ params }: { params: { username: string } }
 
   const grindingMonthName = monthNames[parseInt(data.stats.grindingMonth) - 1];
   const randomMonthName = monthNames[parseInt(data.stats.randomMonthAnalysis.month) - 1];
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -69,10 +96,33 @@ export default function WrappedPage({ params }: { params: { username: string } }
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-3xl md:text-4xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-            {data.profile.name}&apos;s GitHub Wrapped 2024
-          </h1>
-          <p className="text-base text-gray-300">Your year in code</p>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+              {data.profile.name}&apos;s GitHub Wrapped 2024
+            </h1>
+            <button
+              onClick={shareToTwitter}
+              disabled={isSharing}
+              className={`flex items-center gap-2 ${
+                isSharing 
+                  ? 'bg-[#1a8cd8] cursor-not-allowed'
+                  : 'bg-[#1DA1F2] hover:bg-[#1a8cd8]'
+              } transition-colors px-4 py-2 rounded-lg text-white font-medium`}
+            >
+              {isSharing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Sharing...</span>
+                </>
+              ) : (
+                <>
+                  <FaTwitter />
+                  <span>Share on X</span>
+                </>
+              )}
+            </button>
+          </div>
+          <p className="text-base text-gray-300 mb-4">Your year in code</p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
