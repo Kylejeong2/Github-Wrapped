@@ -36,7 +36,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4 mb-8">
             <div className="relative w-12 h-12">
               <Image
-                src="https://github.com/kylejeong2.png"
+                src="https://avatars.githubusercontent.com/kylejeong2"
                 alt="Kyle Jeong"
                 fill
                 className="rounded-full border-2 border-purple-500 object-cover"
