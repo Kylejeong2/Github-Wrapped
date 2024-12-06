@@ -3,10 +3,6 @@ import { OpenAI } from "openai";
 import { Octokit } from "@octokit/rest";
 import { GraphQLResponse, UserStats } from "@/lib/interfaces/interfaces";
 
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
-
-
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN
 });
