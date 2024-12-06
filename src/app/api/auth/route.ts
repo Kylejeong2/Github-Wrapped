@@ -3,7 +3,7 @@ import { OpenAI } from "openai";
 import { Octokit } from "@octokit/rest";
 import { GraphQLResponse, UserStats } from "@/lib/interfaces/interfaces";
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
