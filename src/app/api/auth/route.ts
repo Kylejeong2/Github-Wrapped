@@ -4,7 +4,7 @@ import { Octokit } from "@octokit/rest";
 import { GraphQLResponse, UserStats } from "@/lib/interfaces/interfaces";
 
 export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
