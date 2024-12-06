@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { FaGithub, FaStar, FaCode, FaFire, FaTrophy, FaCalendarAlt, FaExternalLinkAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import GitHubCalendar from 'react-github-calendar';
+import Image from "next/image";
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -67,7 +68,7 @@ export default function WrappedPage({ params }: { params: { username: string } }
           className="text-center mb-8"
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-            {data.profile.name}'s GitHub Wrapped 2024
+            {data.profile.name}&apos;s GitHub Wrapped 2024
           </h1>
           <p className="text-base text-gray-300">Your year in code</p>
         </motion.div>
@@ -80,11 +81,14 @@ export default function WrappedPage({ params }: { params: { username: string } }
             className="bg-gray-800 rounded-xl p-4"
           >
             <div className="flex items-center gap-4 mb-4">
-              <img
-                src={data.profile.avatar_url}
-                alt={data.profile.login}
-                className="w-16 h-16 rounded-full"
-              />
+              <div className="relative w-16 h-16">
+                <Image
+                  src={data.profile.avatar_url}
+                  alt={data.profile.login}
+                  fill
+                  className="rounded-full object-cover"
+                />
+              </div>
               <div>
                 <h2 className="text-xl font-bold">{data.profile.name}</h2>
                 <p className="text-gray-400">@{data.profile.login}</p>
@@ -186,6 +190,86 @@ export default function WrappedPage({ params }: { params: { username: string } }
                   </div>
                 </a>
               ))}
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-gray-800 rounded-xl p-4 mb-4"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-lg font-bold mb-3">Pull Request Activity</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-700 rounded-lg p-3">
+                  <div className="text-purple-400 text-sm mb-1">Total PRs</div>
+                  <div className="text-2xl font-bold">{data.stats.pullRequests.total}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {Math.round((data.stats.pullRequests.merged / data.stats.pullRequests.total) * 100)}% success rate
+                  </div>
+                </div>
+                <div className="bg-gray-700 rounded-lg p-3">
+                  <div className="text-purple-400 text-sm mb-1">Reviews</div>
+                  <div className="text-2xl font-bold">{data.stats.pullRequests.reviewed}</div>
+                  <div className="text-xs text-gray-400 mt-1">Code reviewed</div>
+                </div>
+              </div>
+              <div className="mt-3 bg-gray-700 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-purple-400">PR Status Breakdown</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                      Merged
+                    </span>
+                    <span className="text-sm font-semibold">{data.stats.pullRequests.merged}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      Open
+                    </span>
+                    <span className="text-sm font-semibold">{data.stats.pullRequests.pending}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      Declined
+                    </span>
+                    <span className="text-sm font-semibold">{data.stats.pullRequests.declined}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold mb-3">Recent Pull Requests</h3>
+              <div className="space-y-2 max-h-[250px] overflow-y-auto pr-2">
+                {data.stats.pullRequests.recentPRs.map((pr: any, i: number) => (
+                  <div key={i} className="bg-gray-700 rounded-lg p-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium truncate flex-1">{pr.title}</span>
+                      <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+                        pr.state === 'MERGED' 
+                          ? 'bg-purple-500/20 text-purple-300'
+                          : pr.state === 'OPEN'
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-red-500/20 text-red-300'
+                      }`}>
+                        {pr.state.toLowerCase()}
+                      </span>
+                    </div>
+                    <div className="text-gray-400 text-xs mt-1 flex items-center justify-between">
+                      <span>{pr.repo}</span>
+                      <span>{new Date(pr.date).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>

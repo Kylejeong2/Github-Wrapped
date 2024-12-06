@@ -5,6 +5,7 @@ import { FaGithub, FaStar } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { FormEvent } from "react";
 import Script from "next/script";
+import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
@@ -33,11 +34,14 @@ export default function Home() {
           </p>
           
           <div className="flex items-center justify-center gap-4 mb-8">
-            <img
-              src="https://github.com/kylejeong2.png"
-              alt="Kyle Jeong"
-              className="w-12 h-12 rounded-full border-2 border-purple-500"
-            />
+            <div className="relative w-12 h-12">
+              <Image
+                src="https://github.com/kylejeong2.png"
+                alt="Kyle Jeong"
+                fill
+                className="rounded-full border-2 border-purple-500 object-cover"
+              />
+            </div>
             <div className="text-left">
               <div className="font-semibold">Created by Kyle Jeong</div>
               <div className="flex items-center gap-2">

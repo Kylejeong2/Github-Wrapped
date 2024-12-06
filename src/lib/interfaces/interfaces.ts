@@ -15,11 +15,25 @@ export interface UserStats {
       month: string;
       words: string[];
     };
+    pullRequests: {
+      created: number;
+      reviewed: number;
+      merged: number;
+      declined: number;
+      pending: number;
+      total: number;
+      recentPRs: Array<{
+        title: string;
+        state: string;
+        repo: string;
+        date: string;
+      }>;
+    };
   }
-  
+
 export interface GraphQLResponse {
-    user: {
-      contributionsCollection: {
+  user: {
+    contributionsCollection: {
         contributionCalendar: {
           totalContributions: number;
           weeks: {
@@ -28,6 +42,27 @@ export interface GraphQLResponse {
               date: string;
             }[];
           }[];
+        };
+        pullRequestContributions: {
+          totalCount: number;
+          nodes: Array<{
+            pullRequest: {
+              title: string;
+              state: string;
+              createdAt: string;
+              repository: { name: string };
+            };
+          }>;
+        };
+        pullRequestReviewContributions: {
+          totalCount: number;
+          nodes: Array<{
+            pullRequest: {
+              title: string;
+              state: string;
+              repository: { name: string };
+            };
+          }>;
         };
       };
       repositories: {
