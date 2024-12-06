@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FaGithub, FaStar, FaCode, FaFire, FaTrophy, FaCalendarAlt, FaExternalLinkAlt } from "react-icons/fa";
+import { FaStar, FaCode, FaFire, FaTrophy, FaExternalLinkAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import GitHubCalendar from 'react-github-calendar';
 import Image from "next/image";
+
+export const runtime = 'edge';
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
