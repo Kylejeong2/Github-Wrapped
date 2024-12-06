@@ -6,14 +6,6 @@ import { GraphQLResponse, UserStats } from "@/lib/interfaces/interfaces";
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY is not set in environment variables');
-}
-
-if (!process.env.GITHUB_TOKEN) {
-  throw new Error('GITHUB_TOKEN is not set in environment variables');
-}
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   dangerouslyAllowBrowser: true
