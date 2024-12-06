@@ -1,17 +1,18 @@
-import { UserStats, GraphQLResponse } from "@/lib/interfaces/interfaces";
-import { Octokit } from "@octokit/rest";
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import { OpenAI } from "openai";
+import { Octokit } from "@octokit/rest";
+import { GraphQLResponse, UserStats } from "@/lib/interfaces/interfaces";
+
+export const runtime = 'edge';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
+  dangerouslyAllowBrowser: true
 });
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
+  auth: process.env.GITHUB_TOKEN
 });
-
-export const runtime = "edge";
 
 async function generateAIAnalysis(userData: { stats: UserStats }) {
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -32,8 +33,6 @@ async function generateAIAnalysis(userData: { stats: UserStats }) {
   - Total Commits: ${userData.stats.totalCommits}
   - Most Active Repository: ${userData.stats.mostActiveRepo}
   - Longest Streak: ${userData.stats.longestStreak} days
-  - Pull Requests: ${userData.stats.pullRequests.total} (${userData.stats.pullRequests.merged} merged, ${userData.stats.pullRequests.pending} open)
-  - PR Reviews: ${userData.stats.pullRequests.reviewed}
   - Grinding Month (${monthNames[parseInt(grindingMonth!) - 1]}): ${monthlyCommits[grindingMonth!]} commits
   
   Also, describe their coding style in ${monthNames[parseInt(randomMonth) - 1]} with exactly 3 powerful, single-word adjectives.
@@ -173,26 +172,6 @@ export async function POST(request: Request) {
       .sort(([, a], [, b]) => b - a)[0]?.[0];
 
     // Process the data
-    const prData = userData.contributionsCollection.pullRequestContributions.nodes
-      .filter((node: any) => new Date(node.pullRequest.createdAt) >= new Date('2024-01-01'));
-
-    const prStats = {
-      created: userData.contributionsCollection.pullRequestContributions.totalCount,
-      reviewed: userData.contributionsCollection.pullRequestReviewContributions.totalCount,
-      merged: prData.filter((node: any) => node.pullRequest.state === 'MERGED').length,
-      declined: prData.filter((node: any) => node.pullRequest.state === 'CLOSED').length,
-      pending: prData.filter((node: any) => node.pullRequest.state === 'OPEN').length,
-      total: prData.length,
-      recentPRs: prData
-        .map((node: any) => ({
-          title: node.pullRequest.title,
-          state: node.pullRequest.state,
-          repo: node.pullRequest.repository.name,
-          date: new Date(node.pullRequest.createdAt).toISOString().split('T')[0],
-        }))
-        .slice(0, 5),
-    };
-
     const processedData = {
       profile: userResponse.data,
       stats: {
@@ -206,7 +185,19 @@ export async function POST(request: Request) {
         mostActiveRepo: getMostActiveRepo(userData.repositories.nodes),
         longestStreak: calculateStreak(contributionDays),
         currentStreak: calculateCurrentStreak(contributionDays),
-        pullRequests: prStats,
+        pullRequests: {
+          created: userData.contributionsCollection.pullRequestContributions.totalCount,
+          reviewed: userData.contributionsCollection.pullRequestReviewContributions.totalCount,
+          recentPRs: userData.contributionsCollection.pullRequestContributions.nodes
+            .filter((node: any) => new Date(node.pullRequest.createdAt) >= new Date('2024-01-01'))
+            .map((node: any) => ({
+              title: node.pullRequest.title,
+              state: node.pullRequest.state,
+              repo: node.pullRequest.repository.name,
+              date: new Date(node.pullRequest.createdAt).toISOString().split('T')[0],
+            }))
+            .slice(0, 5),
+        },
         recentRepos: userData.repositories.nodes.slice(0, 6).map((repo: any) => ({
           name: repo.name,
           stars: repo.stargazerCount,
