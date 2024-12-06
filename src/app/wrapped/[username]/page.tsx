@@ -208,9 +208,9 @@ export default function WrappedPage({ params }: { params: { username: string } }
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-700 rounded-lg p-3">
                   <div className="text-purple-400 text-sm mb-1">Total PRs</div>
-                  <div className="text-2xl font-bold">{data.stats.pullRequests.total}</div>
+                  <div className="text-2xl font-bold">{data.stats.pullRequests.created}</div>
                   <div className="text-xs text-gray-400 mt-1">
-                    {Math.round((data.stats.pullRequests.merged / data.stats.pullRequests.total) * 100)}% success rate
+                    {data.stats.pullRequests.stats.mergedPRs} merged
                   </div>
                 </div>
                 <div className="bg-gray-700 rounded-lg p-3">
@@ -221,29 +221,22 @@ export default function WrappedPage({ params }: { params: { username: string } }
               </div>
               <div className="mt-3 bg-gray-700 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-purple-400">PR Status Breakdown</span>
+                  <span className="text-sm text-purple-400">PR Stats</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                      Merged
+                      Total Changes
                     </span>
-                    <span className="text-sm font-semibold">{data.stats.pullRequests.merged}</span>
+                    <span className="text-sm font-semibold">{data.stats.pullRequests.stats.totalChanges.toLocaleString()} lines</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      Open
+                      Avg Changes/PR
                     </span>
-                    <span className="text-sm font-semibold">{data.stats.pullRequests.pending}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                      Declined
-                    </span>
-                    <span className="text-sm font-semibold">{data.stats.pullRequests.declined}</span>
+                    <span className="text-sm font-semibold">{data.stats.pullRequests.stats.averageChangesPerPR.toLocaleString()} lines</span>
                   </div>
                 </div>
               </div>
@@ -252,24 +245,35 @@ export default function WrappedPage({ params }: { params: { username: string } }
               <h3 className="text-lg font-bold mb-3">Recent Pull Requests</h3>
               <div className="space-y-2 max-h-[250px] overflow-y-auto pr-2">
                 {data.stats.pullRequests.recentPRs.map((pr: any, i: number) => (
-                  <div key={i} className="bg-gray-700 rounded-lg p-2 text-sm">
+                  <a 
+                    key={i} 
+                    href={pr.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block bg-gray-700 rounded-lg p-2 text-sm hover:bg-gray-600 transition-colors"
+                  >
                     <div className="flex items-center justify-between">
                       <span className="font-medium truncate flex-1">{pr.title}</span>
                       <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-                        pr.state === 'MERGED' 
+                        pr.merged 
                           ? 'bg-purple-500/20 text-purple-300'
-                          : pr.state === 'OPEN'
+                          : pr.state === 'open'
                           ? 'bg-green-500/20 text-green-300'
                           : 'bg-red-500/20 text-red-300'
                       }`}>
-                        {pr.state.toLowerCase()}
+                        {pr.merged ? 'merged' : pr.state}
                       </span>
                     </div>
                     <div className="text-gray-400 text-xs mt-1 flex items-center justify-between">
                       <span>{pr.repo}</span>
                       <span>{new Date(pr.date).toLocaleDateString()}</span>
                     </div>
-                  </div>
+                    {(pr.additions || pr.deletions) && (
+                      <div className="text-gray-400 text-xs mt-1">
+                        +{pr.additions} -{pr.deletions} lines
+                      </div>
+                    )}
+                  </a>
                 ))}
               </div>
             </div>

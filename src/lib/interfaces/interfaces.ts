@@ -1,35 +1,51 @@
+export interface PullRequest {
+  title: string;
+  state: string;
+  repo: string;
+  date: string;
+  url: string;
+  merged: boolean;
+  additions?: number;
+  deletions?: number;
+}
+
+export interface PRStats {
+  totalChanges: number;
+  mergedPRs: number;
+  averageChangesPerPR: number;
+}
+
 export interface UserStats {
-    totalRepos: number;
-    totalStars: number;
-    topLanguages: [string, number][];
-    commitActivity: { [key: string]: number };
-    totalCommits: number;
-    mostActiveRepo: string;
-    longestStreak: number;
-    currentStreak: number;
-    recentRepos: any[];
-    monthlyCommits: { [key: string]: number };
-    aiAnalysis?: string;
-    grindingMonth?: string;
-    randomMonthAnalysis?: {
-      month: string;
-      words: string[];
-    };
-    pullRequests: {
-      created: number;
-      reviewed: number;
-      merged: number;
-      declined: number;
-      pending: number;
-      total: number;
-      recentPRs: Array<{
-        title: string;
-        state: string;
-        repo: string;
-        date: string;
-      }>;
-    };
-  }
+  totalRepos: number;
+  totalStars: number;
+  topLanguages: [string, number][];
+  commitActivity: { [key: string]: number };
+  totalCommits: number;
+  mostActiveRepo: string;
+  longestStreak: number;
+  currentStreak: number;
+  pullRequests: {
+    created: number;
+    reviewed: number;
+    recentPRs: PullRequest[];
+    recentReviews: PullRequest[];
+    stats: PRStats;
+  };
+  recentRepos: {
+    name: string;
+    stars: number;
+    language: string | null;
+    description: string | null;
+    url: string;
+  }[];
+  monthlyCommits: { [key: string]: number };
+  grindingMonth: string;
+  aiAnalysis?: string;
+  randomMonthAnalysis?: {
+    month: string;
+    words: string[];
+  };
+}
 
 export interface GraphQLResponse {
   user: {

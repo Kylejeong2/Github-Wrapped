@@ -25,6 +25,17 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
+interface PullRequest {
+  title: string;
+  state: string;
+  repo: string;
+  date: string;
+  url: string;
+  merged: boolean;
+  additions: number;
+  deletions: number;
+}
+
 async function generateAIAnalysis(userData: { stats: UserStats }) {
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const monthlyCommits = userData.stats.monthlyCommits;
@@ -113,27 +124,37 @@ export async function POST(request: Request) {
                 }
               }
             }
-            pullRequestContributions(first: 100) {
+            pullRequestContributions(first: 100, orderBy: {direction: DESC}) {
               totalCount
               nodes {
                 pullRequest {
                   title
                   state
+                  url
                   createdAt
+                  merged
+                  additions
+                  deletions
                   repository {
                     name
+                    nameWithOwner
+                    url
                   }
                 }
               }
             }
-            pullRequestReviewContributions(first: 100) {
+            pullRequestReviewContributions(first: 100, orderBy: {direction: DESC}) {
               totalCount
               nodes {
                 pullRequest {
                   title
                   state
+                  url
+                  createdAt
+                  merged
                   repository {
                     name
+                    nameWithOwner
                   }
                 }
               }
@@ -203,11 +224,39 @@ export async function POST(request: Request) {
             .filter((node: any) => new Date(node.pullRequest.createdAt) >= new Date('2024-01-01'))
             .map((node: any) => ({
               title: node.pullRequest.title,
-              state: node.pullRequest.state,
-              repo: node.pullRequest.repository.name,
+              state: node.pullRequest.state.toLowerCase(),
+              repo: node.pullRequest.repository.nameWithOwner,
               date: new Date(node.pullRequest.createdAt).toISOString().split('T')[0],
+              url: node.pullRequest.url,
+              merged: node.pullRequest.merged,
+              additions: node.pullRequest.additions || 0,
+              deletions: node.pullRequest.deletions || 0
+            } as PullRequest))
+            .slice(0, 10),
+          recentReviews: userData.contributionsCollection.pullRequestReviewContributions.nodes
+            .filter((node: any) => new Date(node.pullRequest.createdAt) >= new Date('2024-01-01'))
+            .map((node: any) => ({
+              title: node.pullRequest.title,
+              state: node.pullRequest.state.toLowerCase(),
+              repo: node.pullRequest.repository.nameWithOwner,
+              date: new Date(node.pullRequest.createdAt).toISOString().split('T')[0],
+              url: node.pullRequest.url,
+              merged: node.pullRequest.merged
             }))
             .slice(0, 5),
+          stats: {
+            totalChanges: userData.contributionsCollection.pullRequestContributions.nodes
+              .reduce((acc: number, node: any) => 
+                acc + (node.pullRequest.additions || 0) + (node.pullRequest.deletions || 0), 0),
+            mergedPRs: userData.contributionsCollection.pullRequestContributions.nodes
+              .filter((node: any) => node.pullRequest.merged).length,
+            averageChangesPerPR: Math.round(
+              userData.contributionsCollection.pullRequestContributions.nodes
+                .reduce((acc: number, node: any) => 
+                  acc + (node.pullRequest.additions || 0) + (node.pullRequest.deletions || 0), 0) / 
+              Math.max(1, userData.contributionsCollection.pullRequestContributions.nodes.length)
+            )
+          }
         },
         recentRepos: userData.repositories.nodes.slice(0, 6).map((repo: any) => ({
           name: repo.name,
